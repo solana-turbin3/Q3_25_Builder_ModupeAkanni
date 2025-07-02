@@ -7,7 +7,8 @@
     "spl_init": "ts-node ./spl_init.ts",
     "spl_metadata": "ts-node ./spl_metadata.ts",
     "spl_update_metadata": "ts-node ./update_metadata.ts",
-    "spl_mint": "ts-node ./spl_mint.ts"
+    "spl_mint": "ts-node ./spl_mint.ts",
+    "spl_transfer": "ts-node ./spl_transfer.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
