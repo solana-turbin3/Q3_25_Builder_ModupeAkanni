@@ -56,14 +56,14 @@ pub struct Initialize<'info> {
 }
 
 impl<'info> Initialize<'info> {
-    pub fn init(
+    pub fn initialize(
         &mut self,
         seed: u64,
         fee: u16,
         authority: Option<Pubkey>,
-        bumps: InitializeBumps,
+        bumps: &InitializeBumps,
     ) -> Result<()> {
-        self.sonfig.set_inner(Config {
+        self.config.set_inner(Config {
             seed,
             authority,
             mint_x: self.mint_x.key(),
@@ -71,7 +71,7 @@ impl<'info> Initialize<'info> {
             fee,
             locked: false,
             config_bump: bumps.config,
-            lp_bump: bumps.lp,
+            lp_bump: bumps.mint_lp,
         });
 
         Ok(())

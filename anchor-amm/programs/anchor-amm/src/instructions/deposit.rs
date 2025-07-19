@@ -1,11 +1,11 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{MinTo, Mint, Token, TokenAccount, Transfer, mint_to, transfer},
+    token::{MintTo, Mint, Token, TokenAccount, Transfer, mint_to, transfer},
 };
 use constant_product_curve::ConstantProduct;
 
-use crate::{error::AmmError, state::Config};
+use crate::{errors::AmmError, state::Config};
 
 #[derive(Accounts)]
 pub struct Deposit<'info> {
@@ -17,7 +17,7 @@ pub struct Deposit<'info> {
     #[account(
         has_one= mint_x,
         has_one= mint_y,
-        seeds = [b"config", seed.to_le_bytes().as_ref()],
+        seeds = [b"config", config.seed.to_le_bytes().as_ref()],
         bump = config.config_bump,
     )]
     pub config: Account<'info, Config>,
@@ -60,7 +60,7 @@ pub struct Deposit<'info> {
     #[account(
         init_if_needed,
         payer = user,
-        associated_token::mint = mint_y,
+        associated_token::mint = mint_lp,
         associated_token::authority = user,
     )]
     pub user_lp: Account<'info, TokenAccount>,
@@ -77,7 +77,7 @@ impl<'info> Deposit<'info> {
         require!(amount != 0, AmmError::InvalidAmount);
 
         let (x, y) = match self.mint_lp.supply == 0
-            && self.vault_x_amount == 0
+            && self.vault_x.amount == 0
             && self.vault_y.amount == 0
         {
             true => (max_x, max_y),
@@ -109,12 +109,12 @@ impl<'info> Deposit<'info> {
 
     pub fn deposit_tokens(&self, is_x: bool, amount: u64) -> Result<()> {
         if amount == 0 {
-            return Err(AmmError::ZeroDeposit.into());
+            return Err(AmmError::InvalidDepositAmount.into());
         }
 
         let (from, to) = match is_x {
-            true => (&self.user_x.account_info(), &self.vault_x).account_info(),
-            false => (&self.user_y.account_info(), &self.vault_y.account_info()),
+            true => (self.user_x.to_account_info(), self.vault_x.to_account_info()),
+            false => (self.user_y.to_account_info(), self.vault_y.to_account_info()),
         };
 
         let cpi_accounts = Transfer {
@@ -132,7 +132,7 @@ impl<'info> Deposit<'info> {
 
     pub fn mint_lp_tokens(&self, amount: u64) -> Result<()> {
         if amount == 0 {
-            return Err(AmmError::ZeroDeposit.into());
+            return Err(AmmError::InvalidDepositAmount.into());
         }
 
         let cpi_accounts = MintTo {
