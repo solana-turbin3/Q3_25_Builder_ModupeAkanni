@@ -39,6 +39,8 @@ pub enum AmmError {
     InsufficientBalance,
     #[msg("Zero balance.")]
     ZeroBalance,
+    #[msg("Invalid deposit amount.")]
+    InvalidDepositAmount,
 }
 
 impl From<CurveError> for AmmError {
