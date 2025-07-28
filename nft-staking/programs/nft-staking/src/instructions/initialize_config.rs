@@ -37,7 +37,7 @@ impl <'info> InitializeConfig <'info> {
             points_per_stake,
             max_stake,
             freeze_period,
-            rewards_bump: bumps.rewards_mint,
+            rewards_bump: bumps.reward_mint,
             bump: bumps.config,
         });
 
